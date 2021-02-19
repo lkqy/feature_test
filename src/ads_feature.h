@@ -2,8 +2,8 @@
 #include <vector>
 #include <unordered_map>
 #include <google/protobuf/util/json_util.h>
-//#include "proto/model_feature.pb.h"
-#include "model_feature.pb.h"
+#include "proto/model_feature.pb.h"
+//#include "model_feature.pb.h"
 
 
 struct FeatureResult {
@@ -18,6 +18,8 @@ struct FeatureResult {
 
 
 typedef std::shared_ptr<FeatureResult> FeatureResultPtr;
+
+int hash_feature(const std::string& name, int32_t id);
 
 class ModelFeature {
 public:
@@ -66,11 +68,12 @@ private:
         }
         auto space = it->second;
         */
-        int space = 100;
+		fid = hash_feature(key, fid);
+		//std::cout<<key<<" : "<<fid<<"\n";
         if (is_seq) {
-            feature_result->sequence_features[key].push_back(fid % space);
+            feature_result->sequence_features[key].push_back(fid);
         } else {
-            feature_result->int_features[key] = fid % space;
+            feature_result->int_features[key] = fid;
         }
     }
     FeatureResultPtr feature_result;

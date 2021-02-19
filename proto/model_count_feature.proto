@@ -11,5 +11,7 @@ message BusinessCountFeature {
     ActionCountFeature count_features_7d = 1;
     ActionCountFeature count_features_14d = 2;
     ActionCountFeature count_features_30d = 3;
+    ActionCountFeature count_features_1d = 4;
+    ActionCountFeature count_features_3d = 5;
 };
 

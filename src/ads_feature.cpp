@@ -26,8 +26,12 @@ inline uint32_t time33(const char* str, size_t key_length) {
 }
 
 template<typename T>
-int32_t hash(const T t) {
+int32_t hash(const T& t) {
     return time33((const char*)&t, sizeof(T));
+}
+
+int32_t hash(const std::string& t) {
+    return time33(t.c_str(), t.length());
 }
 
 template<typename T, typename H>
@@ -116,7 +120,7 @@ FeatureResultPtr ModelFeature::extract_user_feature(const UserProfile& up) {
     return feature_result;
 }
 FeatureResultPtr ModelFeature::extract_ad_feature(const AdData& ad) {
-    extract_ad_data("user_ad", ad);
+    extract_ad_data("ad", ad);
     return feature_result;
 }
 FeatureResultPtr ModelFeature::extract_user_ad_feature(const UserAdFeature& uaf) {
@@ -171,6 +175,12 @@ void ModelFeature::extract_bcf(const std::string& prefix, const BusinessCountFea
     }
     if (bcf.has_count_features_30d()) {
         extract_acf(prefix + "_30d", bcf.count_features_30d());
+    }
+    if (bcf.has_count_features_1d()) {
+        extract_acf(prefix + "_1d", bcf.count_features_1d());
+    }
+    if (bcf.has_count_features_3d()) {
+        extract_acf(prefix + "_3d", bcf.count_features_3d());
     }
 }
 
@@ -244,8 +254,8 @@ void ModelFeature::extract_context(const std::string& prefix, const Context& ctx
     //}
     //if (ctx.has_req_time()) {
         auto time = ctx.req_time();
-        auto hour = time / 1000 % 3600;
-        auto week = time / 1000 / 86400 % 7;
+        auto hour = int(time / 1000) % 24;
+        auto week = int(time / 1000 / 86400) % 7;
         append(prefix, "_req_time", hash(time));
         append(prefix, "_req_hour", hash(hour));
         append(prefix, "_req_week", hash(week));
@@ -253,23 +263,29 @@ void ModelFeature::extract_context(const std::string& prefix, const Context& ctx
 }
 
 void ModelFeature::extract_user_ad_count(const std::string& prefix, const UserAdCount& uac) {
-    if (uac.has_user_id_is_auto_download()) {
-        extract_bcf(prefix + "_bcf1", uac.user_id_is_auto_download());
+    if (uac.has_user_id_ad_id()) {
+        extract_bcf(prefix + "_bcf1", uac.user_id_ad_id());
     }
-    if (uac.has_user_id_ad_id_is_auto_download()) {
-        extract_bcf(prefix + "_bcf2", uac.user_id_ad_id_is_auto_download());
+    if (uac.has_user_id_ad_package_name()) {
+        extract_bcf(prefix + "_bcf2", uac.user_id_ad_package_name());
     }
-    if (uac.has_user_id_ad_package_name_is_auto_download()) {
-        extract_bcf(prefix + "_bcf3", uac.user_id_ad_package_name_is_auto_download());
+    if (uac.has_user_id_ad_package_category()) {
+        extract_bcf(prefix + "_bcf3", uac.user_id_ad_package_category());
     }
-    if (uac.has_user_id_ad_package_category_is_auto_download()) {
-        extract_bcf(prefix + "_bcf4", uac.user_id_ad_package_category_is_auto_download());
+    if (uac.has_user_id_pos_id_ad_id()) {
+        extract_bcf(prefix + "_bcf4", uac.user_id_pos_id_ad_id());
     }
-    if (uac.has_user_id_pos_id_ad_id_is_auto_download()) {
-        extract_bcf(prefix + "_bcf5", uac.user_id_pos_id_ad_id_is_auto_download());
+    if (uac.has_user_id_pos_id_ad_package_name()) {
+        extract_bcf(prefix + "_bcf5", uac.user_id_pos_id_ad_package_name());
     }
-    if (uac.has_user_id_pos_id_ad_package_name_is_auto_download()) {
-        extract_bcf(prefix + "_bcf6", uac.user_id_pos_id_ad_package_name_is_auto_download());
+    if (uac.has_user_id_c_id()) {
+        extract_bcf(prefix + "_bcf6", uac.user_id_c_id());
+    }
+    if (uac.has_user_id_pos_id_c_id()) {
+        extract_bcf(prefix + "_bcf7", uac.user_id_pos_id_c_id());
+    }
+    if (uac.has_user_id_pos_id_ad_package_category()) {
+        extract_bcf(prefix + "_bcf8", uac.user_id_pos_id_ad_package_category());
     }
 }
 
@@ -295,8 +311,14 @@ void ModelFeature::extract_ad_count(const std::string& prefix, const AdCount& ac
     if (ac.has_pos_id_ad_package_name()) {
         extract_bcf(prefix + "_bcf5", ac.pos_id_ad_package_name());
     }
-    if (ac.has_is_auto_download()) {
-        extract_bcf(prefix + "_bcf6", ac.is_auto_download());
+    if (ac.has_c_id()) {
+        extract_bcf(prefix + "_bcf6", ac.c_id());
+    }
+    if (ac.has_pos_id_c_id()) {
+        extract_bcf(prefix + "_bcf7", ac.pos_id_c_id());
+    }
+    if (ac.has_pos_id_ad_package_category()) {
+        extract_bcf(prefix + "_bcf8", ac.pos_id_ad_package_category());
     }
 }
 

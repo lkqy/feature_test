@@ -22,8 +22,11 @@ message AdCount {
     BusinessCountFeature ad_package_category = 3;
     BusinessCountFeature pos_id_ad_id = 4;
     BusinessCountFeature pos_id_ad_package_name = 5;
-    BusinessCountFeature is_auto_download = 6;
+    BusinessCountFeature c_id = 6;
+    BusinessCountFeature pos_id_c_id = 7;
+    BusinessCountFeature pos_id_ad_package_category = 8;
 };
+
 
 message AdData {
     AdInfo ad_info = 1;

@@ -7,7 +7,7 @@ COPTS = ["-std=c++11", "-Wno-deprecated", "-O3"]
 
 cc_library(
     name = "ads_feature",
-    srcs = glob(["ads_feature.cpp"]),
+    srcs = glob(["ads_feature.cpp", "hash.cpp"]),
     hdrs = glob(["*.h"]),
     copts = COPTS,
     visibility = ["//visibility:public"],
