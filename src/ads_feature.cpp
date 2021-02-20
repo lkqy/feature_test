@@ -1,4 +1,5 @@
 #include <cmath>
+#include <chrono>
 #include <sstream>
 #include <functional>
 #include <google/protobuf/util/json_util.h>
@@ -52,6 +53,74 @@ double log_div(T a, H b) {
     } else {
         return log(double(a) / b);
     }
+}
+
+
+uint64_t timeSinceEpochMillisec() {
+  using namespace std::chrono;
+  return duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+std::string ModelFeature::extract_tf_example(const std::string& str) {
+	Sample sample;
+    auto status = google::protobuf::util::JsonStringToMessage(str, &sample);
+    if (status.ok()) {
+        auto result = extract_feature(sample.feature());
+		tensorflow::Example example;
+		auto features = example.mutable_features()->mutable_feature();
+        for (auto it : result->int_features) {
+			tensorflow::Feature feature;
+			auto int64 = feature.mutable_int64_list();
+			int64->mutable_value()->Add(it.second);
+			(*features)[it.first] = feature;
+		}
+        for (auto it : result->float_features) {
+			tensorflow::Feature feature;
+			auto floats = feature.mutable_float_list();
+			floats->mutable_value()->Add(it.second);
+			(*features)[it.first] = feature;
+		}
+        for (auto it : result->sequence_features) {
+			tensorflow::Feature feature;
+			auto int64 = feature.mutable_int64_list();
+			for (auto v : it.second) {
+				int64->mutable_value()->Add(v);
+			}
+			(*features)[it.first] = feature;
+		}
+		{
+			tensorflow::Feature feature;
+			auto int64 = feature.mutable_int64_list();
+			int64->mutable_value()->Add(sample.label().imp());
+			(*features)["is_imp"] = feature;
+		}
+		{
+			tensorflow::Feature feature;
+			auto int64 = feature.mutable_int64_list();
+			int64->mutable_value()->Add(sample.label().click());
+			(*features)["is_click"] = feature;
+		}
+		{
+			tensorflow::Feature feature;
+			auto int64 = feature.mutable_int64_list();
+			int64->mutable_value()->Add(sample.label().install());
+			(*features)["is_install"] = feature;
+		}
+		{
+			tensorflow::Feature feature;
+			auto int64 = feature.mutable_int64_list();
+			int64->mutable_value()->Add(sample.label().attr_install());
+			(*features)["is_attr_install"] = feature;
+		}
+
+		std::string ret;
+		example.SerializeToString(&ret);
+		return ret;
+    } else {
+        std::cout<<"error json\n";
+        return "";
+	}
+
 }
 
 std::string ModelFeature::extract_json(const std::string& str) {
@@ -146,6 +215,7 @@ void ModelFeature::extract_acf(const std::string& prefix, const BusinessCountFea
     auto click_attr_install = log_div(acf.click(), acf.attr_install());
     auto install_attr_install = log_div(acf.install(), acf.attr_install());
 
+	//std::cout<<prefix <<"_attr_install"<<attr_install<<" "<<acf.attr_install()<<"    xxxxx\n";
     append(prefix, "_imp", hash(imp));
     append(prefix, "_clk", hash(click));
     append(prefix, "_inst", hash(install));
@@ -243,6 +313,7 @@ void ModelFeature::extract_context(const std::string& prefix, const Context& ctx
     //if (ctx.has_model()) {
         append(prefix, "_model", hash(ctx.model()));
     //}
+        append(prefix, "_lang", hash(ctx.language()));
     //if (ctx.has_app_version_code()) {
         append(prefix, "_app_ver", hash(ctx.app_version_code()));
     //}

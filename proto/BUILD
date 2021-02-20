@@ -8,7 +8,7 @@ COPTS = ["-std=c++17", "-Wno-deprecated", "-O3"]
 
 proto_library(
     name = "model_feature",
-    srcs = ["model_context.proto", "model_count_feature.proto", "model_ad.proto", "model_user_ad.proto", "model_user.proto", "model_feature.proto"],
+    srcs = ["model_context.proto", "model_count_feature.proto", "model_ad.proto", "model_user_ad.proto", "model_user.proto", "model_feature.proto", "tf_feature.proto"],
     visibility = [
         "//visibility:public",
     ],

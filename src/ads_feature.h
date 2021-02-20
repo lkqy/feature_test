@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <google/protobuf/util/json_util.h>
 #include "proto/model_feature.pb.h"
+#include "proto/tf_feature.pb.h"
 //#include "model_feature.pb.h"
 
 
@@ -28,6 +29,7 @@ public:
     }
 
     std::string extract_json(const std::string& str);
+	std::string extract_tf_example(const std::string& str);
     FeatureResultPtr extract_feature(const Feature& feature);
     FeatureResultPtr extract_user_feature(const UserProfile& up);
     FeatureResultPtr extract_ad_feature(const AdData& ad);
@@ -69,7 +71,6 @@ private:
         auto space = it->second;
         */
 		fid = hash_feature(key, fid);
-		//std::cout<<key<<" : "<<fid<<"\n";
         if (is_seq) {
             feature_result->sequence_features[key].push_back(fid);
         } else {
